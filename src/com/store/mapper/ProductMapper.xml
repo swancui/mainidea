@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC   
+    "-//mybatis.org//DTD Mapper 3.0//EN"  
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.store.dao.ProductDao">
+
+	<!-- 查看全部商品 -->
+	<resultMap type="com.store.entity.Product" id="productlist">
+		<id column="pid" property="pid" />
+		<result column="pname" property="pname" />
+		<result column="market_price" property="market_price" />
+		<result column="shop_price" property="shop_price" />
+		<result column="pimage" property="pimage" />
+		<result column="pdate" property="pdate" />
+		<result column="is_hot" property="is_hot" />
+		<result column="pdesc" property="pdesc" />
+		<result column="pflag" property="pflag" />
+		<association property="category" javaType="com.store.entity.Category">
+			<id column="cid" property="cid" />
+			<result column="cname" property="cname" />
+		</association>
+	</resultMap>
+	<select id="getListProduct" resultMap="productlist">
+
+		SELECT pages.* FROM
+		(SELECT page.*, ROWNUM ROWNUMS FROM
+		(
+		SELECT
+		P.PID , P.PNAME , P.MARKET_PRICE,
+		P.SHOP_PRICE , P.PIMAGE , P.PDATE,
+		P.IS_HOT , P.PDESC , P.PFLAG,
+		C.CID , C.CNAME
+		FROM
+		PRODUCT P,CATEGORY C
+		WHERE
+		P.CID=C.CID
+		AND
+		P.PFLAG = #{pflag,jdbcType=NUMERIC}
+		ORDER BY
+		TO_NUMBER(P.PID) ASC)
+    	<![CDATA[ page WHERE ROWNUM <= #{pageSize,jdbcType=NUMERIC}) pages  WHERE ROWNUMS > #{actionPage,jdbcType=NUMERIC}]]>
+
+	</select>
+
+
+
+	<!-- 根据id查找 -->
+	<select id="getObjectById" parameterType="String"
+		resultType="com.store.entity.Product">
+		SELECT * FROM PRODUCT WHERE PID=#{pid}
+	</select>
+
+
+	<!-- 获取商品数据 -->
+
+	<select id="getLengthToList" parameterType="int" resultType="int">
+		SELECT COUNT(*) FROM PRODUCT WHERE PFLAG=#{pflag}
+
+	</select>
+	
+	<select id="getLengthToListCartgory" resultType="int">
+		SELECT COUNT(*) FROM CATEGORY
+
+	</select>
+	
+	<!-- 查找类型 -->
+	<resultMap type="com.store.entity.Category" id="categorylist">
+		<id column="cid" property="cid" />
+		<result column="cname" property="cname" />
+	</resultMap>
+
+	<select id="getListCategory" resultMap="categorylist">
+		SELECT * FROM CATEGORY
+	</select>
+
+	<!-- 修改商品 -->
+	<update id="getUpdateProductByPid" parameterType="com.store.entity.Product">
+		UPDATE PRODUCT
+		<set>
+			<if test="pname!=null">PNAME=#{pname,jdbcType=VARCHAR},</if>
+			<if test="market_price!=null">MARKET_PRICE=#{market_price,jdbcType=NUMERIC},</if>
+			<if test="shop_price!=null">SHOP_PRICE=#{shop_price,jdbcType=NUMERIC},</if>
+			<if test="pimage!=null">PIMAGE=#{pimage,jdbcType=VARCHAR},</if>
+			<if test="pdate!=null">PDATE=TO_DATE (#{pdate,jdbcType=VARCHAR},'YYYY-MM-DD
+				HH24:MI:SS'),</if>
+			<if test="is_hot!=null">IS_HOT=#{is_hot,jdbcType=NUMERIC},</if>
+			<if test="pdesc!=null">PDESC=#{pdesc,jdbcType=VARCHAR},</if>
+			<if test="pflag!=null">PFLAG=#{pflag,jdbcType=NUMERIC},</if>
+			<if test="cid!=null">CID=#{cid,jdbcType=VARCHAR},</if>
+		</set>
+		<where>
+			<if test="pid!=null">PID=#{pid,jdbcType=VARCHAR}</if>
+		</where>
+	</update>
+	<!-- 查找商品类型 -->
+	<select id="getCnameByCname" parameterType="String"
+		resultType="com.store.entity.Category">
+		select cname from category where cname = #{cname}
+	</select>
+	<!-- 添加商品类型 -->
+	<insert id="getInsertToCategory">
+		INSERT INTO CATEGORY VALUES(#{cid},#{cname})
+	</insert>
+
+</mapper>

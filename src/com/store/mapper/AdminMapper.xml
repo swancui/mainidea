@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC   
+    "-//mybatis.org//DTD Mapper 3.0//EN"  
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.store.dao.AdminDao">
+
+	<select id="getAdminByName" parameterType="String"
+		resultType="com.store.entity.Admin">
+		SELECT * FROM ADMIN WHERE NAME = #{name}
+	</select>
+
+	<resultMap type="com.store.entity.Users" id="activatedusers">
+		<id column="usid" property="usid" />
+		<result column="username" property="username" />
+		<result column="password" property="password" />
+		<result column="uname" property="uname" />
+		<result column="email" property="email" />
+		<result column="telephone" property="telephone" />
+		<result column="birthday" property="birthday" />
+		<result column="sex" property="sex" />
+		<result column="ustate" property="ustate" />
+		<result column="code" property="code" />
+	</resultMap>
+	<select id="getActivatedUsers" resultMap="activatedusers">
+		SELECT pages.* FROM
+		(SELECT page.*, ROWNUM ROWNUMS FROM
+		(
+		SELECT * FROM
+		USERS
+		WHERE
+		USTATE = #{ustate,jdbcType=NUMERIC}
+		ORDER BY
+		TO_NUMBER(USID) ASC)
+    	<![CDATA[ page WHERE ROWNUM <= #{pageSize,jdbcType=NUMERIC}) pages  WHERE ROWNUMS > #{actionPage,jdbcType=NUMERIC}]]>
+	</select>
+
+	<select id="getLengthToListUser" parameterType="int" resultType="int">
+		SELECT COUNT(*) FROM USERS WHERE USTATE=#{ustate}
+	</select>
+
+	<update id="getCodeByUsid">
+		UPDATE USERS SET
+		USTATE=#{ustate,jdbcType=NUMERIC},CODE=#{code,jdbcType=VARCHAR} WHERE
+		USID = #{usid,jdbcType=VARCHAR}
+	</update>
+
+	<select id="findName" parameterType="String" resultType="int">
+		SELECT * FROM ADMIN WHERE NAME=#{name}
+	</select>
+
+	<select id="getUserByUsid" parameterType="String"
+		resultType="com.store.entity.Users">
+		SELECT * FROM USERS WHERE USID = #{usid}
+	</select>
+
+	<insert id="getInsert">
+		INSERT INTO ADMIN VALUES(#{aid},#{name},#{password},#{authority})
+	</insert>
+</mapper>
